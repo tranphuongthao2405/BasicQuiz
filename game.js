@@ -37,7 +37,7 @@ let questions = [
 
 // constants
 const CORRECT_BONUS = 10;
-const MAX_QUESTION = 3;
+const MAX_QUESTIONS = 3;
 
 const startGame = () => {
     // reset all and get new question
@@ -49,14 +49,38 @@ const startGame = () => {
 }
 
 const getNewQuestion = () => {
+    // all question shown
+    if(availableQuestion.length === 0 || questionCounter >= MAX_QUESTIONS) {
+        // go to end page
+        return window.location.assign("end.html");
+    }
+
     questionCounter++;
     const questionIndex = Math.floor(Math.random() * availableQuestion.length);
     currentQuestion = availableQuestion[questionIndex];
     question.innerText = currentQuestion.question;
 
     choices.forEach((choice) => {
-        const number = choice.dataset['number'];
-        choice.innerText = currentQuestion['choice' + number];      
+        const number = choice.dataset["number"];
+        choice.innerText = currentQuestion["choice" + number];      
     })
+
+    // cut used question from available questions for show
+    availableQuestion.splice(questionIndex, 1);
+
+    acceptingAnswer = true;  
 }
+
+choices.forEach((choice) => {
+    choice.addEventListener("click", (e) => {
+        if(!acceptingAnswer) {
+            return;
+        }
+        acceptingAnswer = false;
+        const selectedChoice = e.target;
+        const selectedAnswer = selectedChoice.dataset["number"];
+
+        getNewQuestion();
+    })
+})
 startGame();
