@@ -48,7 +48,7 @@ h3 {
   width: 100vw;
   height: 100vh;
   display: flex;
-  /* align horizotally*/
+  /* align horizotally */
   justify-content: center;
   /* align vertically */
   align-items: center;

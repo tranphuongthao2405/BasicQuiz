@@ -1,11 +1,17 @@
 const question = document.getElementById("question");
 const choices = Array.from(document.getElementsByClassName("choice-text"));
+const questionCounterText = document.getElementById("questionCounter");
+const scoreText = document.getElementById("score");
+
+// constants
+const CORRECT_BONUS = 10;
+const MAX_QUESTIONS = 3;
 
 let currentQuestion = {};
 let acceptingAnswer = true;
 let score = 0;
 let questionCounter = 0;
-let availableQuestion = [];
+let availableQuestions = [];
 
 let questions = [
   {
@@ -35,52 +41,78 @@ let questions = [
   },
 ];
 
-// constants
-const CORRECT_BONUS = 10;
-const MAX_QUESTIONS = 3;
-
 const startGame = () => {
-    // reset all and get new question
-    questionCounter = 0;
-    score = 0;
-    availableQuestion = [...questions];
-    console.log(availableQuestion);
-    getNewQuestion();
-}
+  // reset all and get new question
+  questionCounter = 0;
+  score = 0;
+  availableQuestions = [...questions];
+
+  // then get new question
+  getNewQuestion();
+};
 
 const getNewQuestion = () => {
-    // all question shown
-    if(availableQuestion.length === 0 || questionCounter >= MAX_QUESTIONS) {
-        // go to end page
-        return window.location.assign("end.html");
-    }
+  // all question shown
+  if (availableQuestions.length === 0 || questionCounter >= MAX_QUESTIONS) {
+    // go to end page
+    return window.location.assign("end.html");
+  }
 
-    questionCounter++;
-    const questionIndex = Math.floor(Math.random() * availableQuestion.length);
-    currentQuestion = availableQuestion[questionIndex];
-    question.innerText = currentQuestion.question;
+  // if not, update
+  questionCounter++;
+  questionCounterText.innerText = `${questionCounter}/${MAX_QUESTIONS}`;
 
-    choices.forEach((choice) => {
-        const number = choice.dataset["number"];
-        choice.innerText = currentQuestion["choice" + number];      
-    })
+  // get current question shown by random
+  const questionIndex = Math.floor(Math.random() * availableQuestions.length);
+  currentQuestion = availableQuestions[questionIndex];
+  question.innerText = currentQuestion.question;
 
-    // cut used question from available questions for show
-    availableQuestion.splice(questionIndex, 1);
+  choices.forEach((choice) => {
+    const number = choice.dataset["number"];
+    choice.innerText = currentQuestion["choice" + number];
+  });
 
-    acceptingAnswer = true;  
-}
+  // cut used question from available questions for show
+  availableQuestions.splice(questionIndex, 1);
+
+  acceptingAnswer = true;
+};
 
 choices.forEach((choice) => {
-    choice.addEventListener("click", (e) => {
-        if(!acceptingAnswer) {
-            return;
-        }
-        acceptingAnswer = false;
-        const selectedChoice = e.target;
-        const selectedAnswer = selectedChoice.dataset["number"];
+  choice.addEventListener("click", (e) => {
+    if (!acceptingAnswer) {
+      return;
+    }
 
-        getNewQuestion();
-    })
-})
+    acceptingAnswer = false;
+    // return an element
+    const selectedChoice = e.target;
+    const selectedAnswer = selectedChoice.dataset["number"];
+
+    // typeof string with typeof number
+    const classToApply =
+      selectedAnswer == currentQuestion.answer ? "correct" : "incorrect";
+
+    if (classToApply === "correct") {
+      incrementScore(CORRECT_BONUS);
+    }
+
+    // get whole element's container
+    selectedChoice.parentElement.classList.add(classToApply);
+
+    setTimeout(() => {
+      // remove class after done selecting
+      // set enough time to show css
+      selectedChoice.parentElement.classList.remove(classToApply);
+
+      getNewQuestion();
+    }, 1000);
+  });
+});
+
+const incrementScore = (number) => {
+  score += number;
+  scoreText.innerText = score;
+};
+
 startGame();
